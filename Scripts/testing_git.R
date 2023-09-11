@@ -6,14 +6,9 @@ a = 30
 b = 6
 c = 10
 
-sum(a+b+c)
+x=5
 
 
-z <- mean(a, b, c)
-
-x=5 + a
-
-mean(x)
 
 
 
