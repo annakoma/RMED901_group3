@@ -13,7 +13,10 @@ z <- mean(a, b, c)
 
 x=5 + a
 
+y=x+2
+
 mean(x)
+
 
 
 
