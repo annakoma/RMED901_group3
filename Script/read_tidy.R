@@ -1,7 +1,7 @@
 library(tidyverse)
 library(here)
 
-df = read_delim(here("Data", "exam_data.txt"), delim = "\t")
+#df = read_delim(here("Data", "exam_data.txt"), delim = "\t")
 
 # trying to get an overview of the data
 head(df)
