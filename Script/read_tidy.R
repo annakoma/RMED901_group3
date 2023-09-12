@@ -1,8 +1,8 @@
 library(tidyverse)
 library(here)
 
-df = read_delim(here("Data", "exam_data.txt"), delim = "\t")
-colnames(df)
+df = read_tsv(here("Data", "exam_data.txt"))
+
 df = df %>%
   distinct %>%
   setNames(colnames(df) %>% 
@@ -10,4 +10,5 @@ df = df %>%
              str_replace_all("^%", "percent_") %>%
              str_replace_all("%$", "_percent"))
 
-write_delim(df, here("tidy_data.tsv"))
+
+write_tsv(df, here("tidy_data.tsv"))
