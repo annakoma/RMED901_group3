@@ -1,0 +1,6 @@
+# test test
+b = 2
+c = 3
+a = b + c
+
+#Legger til noe tekst
