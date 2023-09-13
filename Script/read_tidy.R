@@ -10,5 +10,4 @@ df = df %>%
              str_replace_all("^%", "percent_") %>%
              str_replace_all("%$", "_percent"))
 
-
 write_tsv(df, here("tidy_data.tsv"))
