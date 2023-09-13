@@ -1,7 +1,5 @@
 library(tidyverse)
 library(here)
-library(naniar)
-library(visdat)
 
 # Preparation----
 df = read_table(here("tidy_data.tsv"))
