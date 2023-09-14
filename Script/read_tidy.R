@@ -9,12 +9,14 @@ df_raw[df_raw$wbc != df_raw$wbc_copy, ]
 # and they are identical. 
 
 df_tidy = df_raw %>%
-  distinct %>%
-  setNames(colnames(df_raw) %>% 
-             str_replace_all(" ", "_") %>%
-             str_replace_all("%neut", "neut_percent") %>%
-             str_replace_all("%$", "_percent")) %>%
-  select(-wbc_copy) # Remove the copy.
+  distinct %>% # Remove duplicate rows
+  rename(days_of_life='days of life', # Rename columns
+         neut_percent='%neut',
+         lymph_percent='lymph%') %>%
+  pivot_wider(names_from = mean_RBC_characteristic, 
+              values_from = mean_value) # Store the mean value of each RBC type in a column
+  select(-wbc_copy) # Remove the duplicate column.
 # Now 23 columns as intended
 
-write_tsv(df_tidy, here("tidy_data.tsv"))
+# Write data
+write_tsv(df_tidy, here("Data", "tidy_data.tsv"))
