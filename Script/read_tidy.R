@@ -1,19 +1,22 @@
 library(tidyverse)
 library(here)
 
-#final code, put into 1:
-myData<-read_delim(here("Data", "exam_data.txt"), delim = "\t")%>%
-  distinct()%>% #removing duplications
-  rename(days_of_life='days of life', #renaming some colums
+df_raw = read_tsv(here("Data", "exam_data.txt"))
+
+colnames(df_raw)
+# There's a weird column "wbc_copy" in df
+df_raw[df_raw$wbc != df_raw$wbc_copy, ]
+# and they are identical. 
+
+df_tidy = df_raw %>%
+  distinct %>% # Remove duplicate rows
+  rename(days_of_life='days of life', # Rename columns
          neut_percent='%neut',
-       lymf_perc='lymph%')%>%
+         lymph_percent='lymph%') %>%
   pivot_wider(names_from = mean_RBC_characteristic, 
-              values_from = mean_value) #putting blood type in colums
+              values_from = mean_value) # Store the mean value of each RBC type in a column
+  select(-wbc_copy) # Remove the duplicate column.
+# Now 23 columns as intended
 
-#visualising myData:
-glimpse(myData)
-
-#saving myData:
-fileName <- paste0("blood_sample_", Sys.Date(), ".txt")
-write_delim(myData, 
-            file = here("Data", fileName), delim="\t")
+# Write data
+write_tsv(df_tidy, here("Data", "tidy_data.tsv"))
