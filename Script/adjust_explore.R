@@ -1,5 +1,6 @@
 library(tidyverse)
 library(here)
+
 # reading the tidy file from yesterday (12. september) and assigning to main_df
 main_df <-  read_delim(here("Data", "IBD_tidy_2023-09-12.txt"), delim = "\t")
 
@@ -61,5 +62,64 @@ complete_data <- complete_data %>%
 
 complete_data <- complete_data %>%
   arrange(sort(patient_id))
+
+
+# glucose by gender
+df_adjuSted %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
+
+# glucose by gender with hgb <= 10
+df_adjuSted %>%
+  filter(hgb <= 10) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
+
+# glucose by gender with remission
+df_adjuSted %>%
+  filter(remission == T) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
+
+# glucose by gender for older than around 40 years
+df_adjuSted %>%
+  filter(days_of_life > 40 * 365.25) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
+
+# glucose by gender with more than 10% of monocytes in WBC
+df_adjuSted %>%
+  filter(mono_percent > 10) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
+
+# table by gender and remission
+df_adjuSted %>%
+  count(gender, remission)
 
 
