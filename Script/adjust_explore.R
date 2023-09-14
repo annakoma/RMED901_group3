@@ -10,7 +10,6 @@ df_additional = read_table(here("Data", "exam_data_joindata.txt"))
 colnames(df_tidy)
 colnames(df_additional)
 colnames(df_tidy)[colnames(df_tidy) %in% colnames(df_additional)]
-colnames(df_additional)[colnames(df_additional) %in% colnames(df_tidy)]
 # Only the patient_id is in common.
 
 # There's an extra "gender" column in the additional data, but that's probably fine
@@ -37,7 +36,7 @@ df_adjusted = df_joined %>%
   arrange(patient_id) # Sort by patient ID
 
 # Write for examination (maybe in Excel)
-write_tsv(df_adjusted, here("joined_adjusted.tsv"))
+write_tsv(df_adjusted, here("Data", "joined_adjusted.tsv"))
 
 # glucose by gender
 df_adjusted %>%

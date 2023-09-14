@@ -14,7 +14,8 @@ df_tidy = df_raw %>%
          neut_percent='%neut',
          lymph_percent='lymph%') %>%
   pivot_wider(names_from = mean_RBC_characteristic, 
-              values_from = mean_value) # Store the mean value of each RBC type in a column
+              names_prefix = "mean_RBC_",
+              values_from = mean_value) %>% # Mean of each RBC type in a column
   select(-wbc_copy) # Remove the duplicate column.
 # Now 23 columns as intended
 

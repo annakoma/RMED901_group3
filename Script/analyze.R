@@ -2,9 +2,10 @@ library(tidyverse)
 library(here)
 library(reshape2)
 library(ggpubr)
+library(patchwork)
 
 # Adjusted data
-df_adjusted = read_table(here("joined_adjusted.tsv"))
+df_adjusted = read_table(here("Data", "joined_adjusted.tsv"))
 
 # Does the remission depend on the gender?
 # Chi-squared test p-value
@@ -18,7 +19,9 @@ df_adjusted %>%
   annotate("text", x = 1.5, y = Inf, 
            label = sprintf("p = %.3f", p_val), vjust = 1, hjust = .5) +
   theme(axis.text.y = element_blank()) +
-  labs(title = "Remission does not depend on gender.")
+  labs(title = "Remission does not depend on gender") ->
+  plt_rem_gender
+plt_rem_gender
 
 # Does the remission depend on chloride?
 # p-value from logistic regression model
@@ -28,27 +31,42 @@ p_val = summary(model)$coefficients[2,4]
 # plot
 df_adjusted %>%
   ggplot(aes(chlor, as.integer(remission))) + 
-  geom_point(alpha = .5) +
   geom_smooth(method="glm", method.args=list(family="binomial")) +
+  geom_point(alpha = .5) +
   annotate("text", x = Inf, y = Inf, 
            label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
   labs(x = "chloride", y = "", 
-       title = "Remission depends on chloride")
+       title = "Remission depends on chloride") ->
+  plt_rem_cl
+plt_rem_cl
 
 # Is there an association between calcium and total bilirubin?
 df_adjusted %>%
   ggplot(aes(tbil, cal)) +
-  geom_point(alpha = .5) +
   geom_smooth(method = "lm") +
+  geom_point(alpha = .5) +
   stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
   labs(x = "total bilirubin", y = "calcium", 
-       title = "Calcium and belirubin levels negatively correlate.")
+       title = "Calcium and belirubin negatively correlate") ->
+  plt_ca_bil
+plt_ca_bil
 
 # According to the data, was there a difference of alanine transaminase between gender categories?
 df_adjusted %>%
   ggplot(aes(gender, alt, fill = gender)) +
   geom_violin() +
-  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
-  labs(y = "alanine transaminase", title = "Alanine transaminase level does not depend on gender.") +
-  theme(legend.position = "none")
+  geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
+  labs(y = "alanine transaminase", 
+       title = "Alanine transaminase does not depend on gender") +
+  theme(legend.position = "none") ->
+  plt_ala_gender
+plt_ala_gender
+
+# Combined plot
+(plt_rem_gender + plt_rem_cl) /
+(plt_ca_bil + plt_ala_gender)
+
+# Save plot
+ggsave(here("Plots", "Day_8_Combined.png"), width = 12, height = 10)
+
