@@ -1,55 +1,46 @@
 library(tidyverse)
 library(here)
 
-# reading the tidy file from yesterday (12. september) and assigning to main_df
-main_df <-  read_delim(here("Data/blood_sample_2023-09-14.txt"), delim = "\t")
+# Preparation----
+# Read data
+df_tidy = read_table(here("Data", "tidy_data.tsv"))
+df_additional = read_table(here("Data", "exam_data_joindata.txt"))
+
+# Check column name overlaps between the two dataset
+colnames(df_tidy)
+colnames(df_additional)
+colnames(df_tidy)[colnames(df_tidy) %in% colnames(df_additional)]
+colnames(df_additional)[colnames(df_additional) %in% colnames(df_tidy)]
+# Only the patient_id is in common.
+
+# There's an extra "gender" column in the additional data, but that's probably fine
 
 
-# removing the colomns "hct" and "rdw" and "wbc_copy"
-main_df <- main_df %>%
-  select(-"hct", -"rdw", -"wbc_copy")
+# Tasks----
+identical(unique(df_tidy$patient_id), unique(df_additional$patient_id))
+# All patients IDs are present in both data; it doesn't matter how to join them
 
-#reading the additional dataset
+# Remove hct and rdw, then join with additional data by the patient ID
+df_joined = df_tidy %>% 
+  select(-c("hct", "rdw")) %>%
+  left_join(df_additional, by = "patient_id")
 
-join_df <- read_delim(here("Data", "exam_data_joindata.txt"), delim = "\t")
+# Change data types, create new columns, set column order, sort by patient ID
+df_adjusted = df_joined %>%
+  mutate(across(c(active, remission), as.logical)) %>% # `active` and `remession` as logical
+  mutate(gender = as.factor(gender)) %>% # `gender` as factor
+  mutate(lymph_count = wbc * lymph_percent, # New columns for lymph count,
+         sod_frac = sod + pot + chlor, # fraction of sodium in the sum of Na, K and Cl,
+         hgb_quartile = ntile(hgb, 4), # `hgb` as quartile,
+         un_above30 = un > 30) %>% # and whether blood urea nitrogen is above 30 
+  select(patient_id, days_of_life, un, wbc, everything()) %>% # Set column order
+  arrange(patient_id) # Sort by patient ID
 
-# joining the two datasets
-complete_data <- 
-  main_df %>%
-  full_join(join_df, join_by("patient_id"))
-
-glimpse(complete_data)
-
-# converting the columns "active" and "remission" to factors.
-complete_data <- complete_data %>%
-  mutate(active = as.factor(active),
-         remission = as.factor(remission),
-         
-         #making a new column showing lymph cell count 
-         lymph_cellcount = lymf_perc*wbc,
-         # making a new column showing sodium as a fraction of the sum of sodium,potassium and chloride
-         sod_fraction = sod/(sod+pot+chlor),
-         #dividing the hgb column into quartiles
-         hgb_percentiles = cut(hgb,c(4.50,11.60,12.70,13.80,18.60)),
-         #creating a column checking whether Blood Urea Nitrogen is above 30
-         un_above30 = if_else(un>30,"Yes","No"))
-
-
-#Set the order of columns as: `patient_id, days_of_life, un, wbc` and other columns and 
-complete_data <- complete_data %>%
-  select(patient_id, days_of_life, un, wbc, everything())
-
-# arrange patient_id column of your dataset in order of increasing number or alphabetically.
-complete_data <- complete_data %>%
-  arrange(sort(patient_id))
-
-glimpse(complete_data)
-fileName <- paste0("tidy_joined_data.txt")
-write_delim(complete_data,file = here("Data", fileName), delim = "\t" )
-
+# Write for examination (maybe in Excel)
+write_tsv(df_adjusted, here("joined_adjusted.tsv"))
 
 # glucose by gender
-complete_data %>%
+df_adjusted %>%
   group_by(gender) %>%
   summarize(
     min_gluc = min(gluc, na.rm = T),
@@ -59,7 +50,8 @@ complete_data %>%
   )
 
 # glucose by gender with hgb <= 10
-complete_data %>%
+df_adjusted %>%
+  
   filter(hgb <= 10) %>%
   group_by(gender) %>%
   summarize(
@@ -70,7 +62,7 @@ complete_data %>%
   )
 
 # glucose by gender with remission
-complete_data %>%
+df_adjusted %>%
   filter(remission == T) %>%
   group_by(gender) %>%
   summarize(
@@ -81,7 +73,7 @@ complete_data %>%
   )
 
 # glucose by gender for older than around 40 years
-complete_data %>%
+df_adjusted %>%
   filter(days_of_life > 40 * 365.25) %>%
   group_by(gender) %>%
   summarize(
@@ -92,7 +84,7 @@ complete_data %>%
   )
 
 # glucose by gender with more than 10% of monocytes in WBC
-complete_data %>%
+df_adjusted %>%
   filter(mono_percent > 10) %>%
   group_by(gender) %>%
   summarize(
@@ -103,7 +95,5 @@ complete_data %>%
   )
 
 # table by gender and remission
-complete_data %>%
+df_adjusted %>%
   count(gender, remission)
-
-
