@@ -2,14 +2,16 @@ library(tidyverse)
 library(here)
 
 # Preparation----
-df_tidy = read_table(here("tidy_data.tsv"))
+# Read data
+df_tidy = read_table(here("Data", "tidy_data.tsv"))
 df_additional = read_table(here("Data", "exam_data_joindata.txt"))
 
+# Check column name overlaps between the two dataset
 colnames(df_tidy)
 colnames(df_additional)
 colnames(df_tidy)[colnames(df_tidy) %in% colnames(df_additional)]
 colnames(df_additional)[colnames(df_additional) %in% colnames(df_tidy)]
-# Only the patient_id is common.
+# Only the patient_id is in common.
 
 # There's an extra "gender" column in the additional data, but that's probably fine
 
@@ -18,20 +20,21 @@ colnames(df_additional)[colnames(df_additional) %in% colnames(df_tidy)]
 identical(unique(df_tidy$patient_id), unique(df_additional$patient_id))
 # All patients IDs are present in both data; it doesn't matter how to join them
 
-# Remove hct and rdw, then join by the patient ID
+# Remove hct and rdw, then join with additional data by the patient ID
 df_joined = df_tidy %>% 
-  select(-c("hct", "rdw")) %>% left_join(df_additional, by = "patient_id")
+  select(-c("hct", "rdw")) %>%
+  left_join(df_additional, by = "patient_id")
 
 # Change data types, create new columns, set column order, sort by patient ID
 df_adjusted = df_joined %>%
-  mutate(across(c(active, remission), as.logical)) %>%
-  mutate(across(c(mean_RBC_characteristic, gender), as.factor)) %>%
-  mutate(lymph_count = wbc * lymph_percent,
-         sod_frac = sod + pot + chlor,
-         hgb_quartile = ntile(hgb, 4),
-         un_30 = un > 30) %>%
-  select(patient_id, days_of_life, un, wbc, everything()) %>%
-  arrange(patient_id)
+  mutate(across(c(active, remission), as.logical)) %>% # `active` and `remession` as logical
+  mutate(gender = as.factor(gender)) %>% # `gender` as factor
+  mutate(lymph_count = wbc * lymph_percent, # New columns for lymph count,
+         sod_frac = sod + pot + chlor, # fraction of sodium in the sum of Na, K and Cl,
+         hgb_quartile = ntile(hgb, 4), # `hgb` as quartile,
+         un_above30 = un > 30) %>% # and whether blood urea nitrogen is above 30 
+  select(patient_id, days_of_life, un, wbc, everything()) %>% # Set column order
+  arrange(patient_id) # Sort by patient ID
 
 # Write for examination (maybe in Excel)
 write_tsv(df_adjusted, here("joined_adjusted.tsv"))
@@ -48,6 +51,7 @@ df_adjusted %>%
 
 # glucose by gender with hgb <= 10
 df_adjusted %>%
+  
   filter(hgb <= 10) %>%
   group_by(gender) %>%
   summarize(
