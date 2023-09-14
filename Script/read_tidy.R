@@ -1,7 +1,6 @@
 library(tidyverse)
 library(here)
 
-
 #final code, put into 1:
 myData<-read_delim(here("Data", "exam_data.txt"), delim = "\t")%>%
   distinct()%>% #removing duplications
@@ -18,3 +17,4 @@ glimpse(myData)
 fileName <- paste0("blood_sample_", Sys.Date(), ".txt")
 write_delim(myData, 
             file = here("Data", fileName), delim="\t")
+
