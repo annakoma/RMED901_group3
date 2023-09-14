@@ -1,20 +1,20 @@
 library(tidyverse)
 library(here)
 
-#final code, put into 1:
-myData<-read_delim(here("Data", "exam_data.txt"), delim = "\t")%>%
-  distinct()%>% #removing duplications
-  rename(days_of_life='days of life', #renaming some colums
-         neut_percent='%neut',
-       lymf_perc='lymph%')%>%
-  pivot_wider(names_from = mean_RBC_characteristic, 
-              values_from = mean_value) #putting blood type in colums
+df_raw = read_tsv(here("Data", "exam_data.txt"))
 
-#visualising myData:
-glimpse(myData)
+colnames(df_raw)
+# There's a weird column "wbc_copy" in df
+df_raw[df_raw$wbc != df_raw$wbc_copy, ]
+# and they are identical. 
 
-#saving myData:
-fileName <- paste0("blood_sample_", Sys.Date(), ".txt")
-write_delim(myData, 
-            file = here("Data", fileName), delim="\t")
+df_tidy = df_raw %>%
+  distinct %>%
+  setNames(colnames(df_raw) %>% 
+             str_replace_all(" ", "_") %>%
+             str_replace_all("%neut", "neut_percent") %>%
+             str_replace_all("%$", "_percent")) %>%
+  select(-wbc_copy) # Remove the copy.
+# Now 23 columns as intended
 
+write_tsv(df_tidy, here("tidy_data.tsv"))

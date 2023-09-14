@@ -1,65 +1,95 @@
 library(tidyverse)
 library(here)
-# reading the tidy file from yesterday (12. september) and assigning to main_df
-main_df <-  read_delim(here("Data", "IBD_tidy_2023-09-12.txt"), delim = "\t")
+
+# Preparation----
+df_tidy = read_table(here("tidy_data.tsv"))
+df_additional = read_table(here("Data", "exam_data_joindata.txt"))
+
+colnames(df_tidy)
+colnames(df_additional)
+colnames(df_tidy)[colnames(df_tidy) %in% colnames(df_additional)]
+colnames(df_additional)[colnames(df_additional) %in% colnames(df_tidy)]
+# Only the patient_id is common.
+
+# There's an extra "gender" column in the additional data, but that's probably fine
 
 
-# removing the colomns "hct" and "rdw" and "wbc_copy"
-main_df <- main_df %>%
-  select(-"hct", -"rdw", -"wbc_copy")
+# Tasks----
+identical(unique(df_tidy$patient_id), unique(df_additional$patient_id))
+# All patients IDs are present in both data; it doesn't matter how to join them
 
-#reading the additional dataset
+# Remove hct and rdw, then join by the patient ID
+df_joined = df_tidy %>% 
+  select(-c("hct", "rdw")) %>% left_join(df_additional, by = "patient_id")
 
-join_df <- read_delim(here("Data", "exam_data_joindata.txt"), delim = "\t")
+# Change data types, create new columns, set column order, sort by patient ID
+df_adjuSted = df_joined %>%
+  mutate(across(c(active, remission), as.logical)) %>%
+  mutate(across(c(mean_RBC_characteristic, gender), as.factor)) %>%
+  mutate(lymph_count = wbc * lymph_percent,
+         sod_frac = sod + pot + chlor,
+         hgb_quartile = ntile(hgb, 4),
+         un_30 = un > 30) %>%
+  select(patient_id, days_of_life, un, wbc, everything()) %>%
+  arrange(patient_id)
 
-# joining the two datasets
-complete_data <- 
-  main_df %>%
-  full_join(join_df, join_by("patient_id"))
+# Write for examination (maybe in Excel)
+write_tsv(df_adjuSted, here("joined_adjusted.tsv"))
 
+# glucose by gender
+df_adjuSted %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
 
-#trying to visualise the complete dataset
-glimpse(complete_data)
-summary(complete_data)
-skimr::skim(complete_data)
+# glucose by gender with hgb <= 10
+df_adjuSted %>%
+  filter(hgb <= 10) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
 
-# converting the columns "active" and "remission" to factors.
-complete_data <- complete_data %>%
-  mutate(active = as.factor(active),
-         remission = as.factor(remission))
+# glucose by gender with remission
+df_adjuSted %>%
+  filter(remission == T) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
 
-#making a new column showing lymph cell count 
+# glucose by gender for older than around 40 years
+df_adjuSted %>%
+  filter(days_of_life > 40 * 365.25) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
 
-complete_data <- complete_data %>%
-  mutate(lymph_cellcount = lymph_percent*wbc)
-  
+# glucose by gender with more than 10% of monocytes in WBC
+df_adjuSted %>%
+  filter(mono_percent > 10) %>%
+  group_by(gender) %>%
+  summarize(
+    min_gluc = min(gluc, na.rm = T),
+    max_gluc = max(gluc, na.rm = T), 
+    mean_gluc = mean(gluc, na.rm = T), 
+    sd_gluc = sd(gluc, na.rm = T)
+  )
 
-# making a new column showing sodium as a fraction of the sum of sodium,potassium and chloride
-complete_data <- complete_data %>%
-  mutate(sod_fraction = sod/(sod+pot+chlor))
- 
-
-#dividing the hgb column into quartiles
-complete_data <- complete_data %>%
-  mutate(hgb_percentiles = cut(hgb,c(4.50,11.60,12.70,13.80,18.60)))
-  
-
-summary(complete_data)
-
-#creating a column checking whether Blood Urea Nitrogen is above 30
-
-complete_data <- complete_data %>%
-  mutate(un_above30 = if_else(un>30,"Yes","No"))
-  
-
-#Set the order of columns as: `patient_id, days_of_life, un, wbc` and other columns
-
-complete_data <- complete_data %>%
-  select(patient_id, days_of_life, un, wbc, everything())
-
-#Arrange patient_id column of your dataset in order of increasing number or alphabetically. 
-
-complete_data <- complete_data %>%
-  arrange(sort(patient_id))
-
-
+# table by gender and remission
+df_adjuSted %>%
+  count(gender, remission)
