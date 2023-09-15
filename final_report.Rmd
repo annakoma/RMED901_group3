@@ -10,3 +10,190 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+## Day 7 Visualization
+```{r preamble, include=FALSE}
+library(tidyverse)
+library(here)
+library(reshape2)
+library(ggpubr)
+library(patchwork)
+
+df = read_table(here("Data", "joined_adjusted.tsv"))
+
+theme_set(theme_bw() +
+            theme(axis.ticks = element_blank()))
+```
+
+### Are there any correlated measurements?
+```{r correlation heatmap, echo=FALSE, message=FALSE, warning=FALSE}
+cor(df[, sapply(df, is.numeric)], use = "complete.obs") %>%
+  reshape2::melt() %>%
+  ggplot(aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
+  labs(x = "", y = "", fill = "", title = "correlation heatmap")
+```
+
+Some variables are positively or negatively correlated with each other. For example, the neutrophil proportion and white blood cell count are both negatively correlated with lymphocite, monocyte, eosinophil, and basophil proportions, while neutrophil and white blood cell count are positively correlated with each other, suggesting that a large portion of white blood cells are neutrophils.
+
+### Does the sodium distribution depend on `gender`?
+```{r Na vs gender, echo=FALSE, message=FALSE, warning=FALSE}
+df %>%
+  ggplot(aes(gender, sod, fill = gender)) +
+  geom_violin(alpha = .5) +
+  geom_boxplot(alpha = .75) +
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
+  labs(y = "sodium") +
+  theme(legend.position = "none")
+```
+
+```{r Na vs gender; p for reporting, include=FALSE}
+p_val = signif(wilcox.test(df[df$gender == "F",]$sod, df[df$gender == "M",]$sod)$p.value, 2)
+```
+
+Sodium levels are distributed similarly between sexes. The difference is statistically insignificant (Wilcoxon rank sum $p=`r p_val`$).
+
+### Does the white blood cell count distribution depend on `pot`?
+```{r WBC vs K, echo=FALSE, message=FALSE, warning=FALSE}
+df %>%
+  ggplot(aes(pot, wbc)) +
+  geom_smooth(method = "lm") +
+  geom_point(alpha = .1) +
+  stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
+  labs(x = "potassium", y = "white blood cell count")
+```
+
+```{r WBC vs K; R and p for reporting, include=FALSE}
+ct = cor.test(df$pot, df$wbc)
+pearson_r = signif(ct$estimate, 2)
+p_val = signif(ct$p.value, 2)
+```
+
+White blood cell count does not significantly (Pearson $R=`r pearson_r`$, $p=`r p_val`$) depend on the potassium level.
+
+### Do albumin and protein have a linear relationship?
+```{r albumin vs protein, echo=FALSE, message=FALSE, warning=FALSE}
+df %>%
+  ggplot(aes(prot, alb)) +
+  geom_smooth(method = "lm") +
+  geom_point(alpha = .1) +
+  stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
+  labs(x = "protein", y = "albumin")
+```
+
+```{r albumin vs protein; R and p for reporting, include=FALSE}
+ct = cor.test(df$prot, df$alb)
+pearson_r = signif(ct$estimate, 2)
+p_val = sub(".*< (\\d+\\.\\d+e-\\d+)$", "\\1", 
+            grep("p-value", capture.output(ct), value = T))
+```
+
+Albumin and protein levels have a linear relationship with each other. They are positively correlated (Pearson $R=`r pearson_r`$, $p<`r p_val`$).
+
+### Does remission of inflammation after Thiopurines for > 12 weeks change with percent of monocytes in WBC count?
+```{r remission vs monocyte, echo=FALSE, message=FALSE, warning=FALSE}
+# p-value from logistic regression model
+model = glm(remission ~ mono_percent, data = df, family = binomial)
+p_val = summary(model)$coefficients[2,4]
+
+df %>%
+  ggplot(aes(mono_percent, as.integer(remission))) + 
+  geom_smooth(method="glm", method.args=list(family="binomial")) +
+  geom_point(alpha = .1) +
+  annotate("text", x = Inf, y = Inf, 
+           label = sprintf("p = %.3f", p_val), vjust = 1, hjust = 1) +
+  labs(x = "monocyte percent in WBC", y = "") +
+  scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission"))
+```
+
+According to logistic regression, the monocyte proportion does not seem to predict remission very well ($p=`r signif(p_val, 2)`$).
+
+## Day 8 Anasysis
+### Does the remission depend on the gender?
+```{r remission vs gender, echo=FALSE, message=FALSE, warning=FALSE}
+# Chi-squared test p-value
+contingency_table = table(df$gender, df$remission)
+chi_test = chisq.test(contingency_table)
+p_val = chi_test$p.value
+
+df %>%
+  ggplot(aes(gender, remission, fill = remission)) +
+  geom_col() +
+  annotate("text", x = 1.5, y = Inf, 
+           label = sprintf("p = %.3f", p_val), vjust = 1, hjust = .5) +
+  theme(axis.text.y = element_blank())
+```
+
+A $\chi^2$-test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
+
+### Does the remission depend on chloride?
+```{r remission vs Cl, echo=FALSE, message=FALSE, warning=FALSE}
+# p-value from logistic regression model
+model = glm(remission ~ chlor, data = df, family = binomial)
+p_val = summary(model)$coefficients[2,4]
+
+# plot
+df %>%
+  ggplot(aes(chlor, as.integer(remission))) + 
+  geom_smooth(method="glm", method.args=list(family="binomial")) +
+  geom_point(alpha = .1) +
+  annotate("text", x = Inf, y = Inf, 
+           label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
+  scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
+  labs(x = "chloride", y = "")
+```
+
+Logistic regression shows that higher chloride levels predict a higher probability of remission ($p=`r signif(p_val, 2)`$).
+
+### Is there an association between calcium and total bilirubin?
+```{r Ca vs bilirubin, echo=FALSE, message=FALSE, warning=FALSE}
+df %>%
+  ggplot(aes(tbil, cal)) +
+  geom_smooth(method = "lm") +
+  geom_point(alpha = .1) +
+  stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
+  labs(x = "total bilirubin", y = "calcium")
+```
+
+```{r Ca vs bilirubin; R and p for reporting, include=FALSE}
+ct = cor.test(df$tbil, df$cal)
+pearson_r = signif(ct$estimate, 2)
+p_val = sub(".*< (\\d+\\.\\d+e-\\d+)$", "\\1", 
+            grep("p-value", capture.output(ct), value = T))
+```
+
+Linear regression shows a highly significant negative correlation (Pearson $R=`r pearson_r`$, $p<`r p_val`$) between the calcium and total bilirubin levels.
+
+### According to the data, was there a difference of alanine transaminase between gender categories?
+```{r ALT vs gender, echo=FALSE, message=FALSE, warning=FALSE}
+df %>%
+  ggplot(aes(gender, alt, fill = gender)) +
+  geom_violin() +
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
+  labs(y = "alanine transaminase") +
+  theme(legend.position = "none")
+```
+
+```{r ALT vs gender; p for reporting, include=FALSE}
+p_val = signif(wilcox.test(df[df$gender == "F",]$alt, df[df$gender == "M",]$alt)$p.value, 2)
+```
+
+Alanine transaminase levels are distributed similarly between sexes. The difference is statistically insignificant (Wilcoxon rank sum $p=`r p_val`$).
+
+Non-parametric Wilcoxon test was used because the data distribution violated the t-test normality assumption.
+
+- Shapiro-Wilk test
+```{r ALT vs gender; Shapiro-Wilk, echo=FALSE}
+alt_m = df[df$gender == "M", ]$alt
+alt_f = df[df$gender == "F", ]$alt
+shapiro.test(alt_m)
+shapiro.test(alt_f)
+```
+
+- Q-Q plot
+
+```{r ALT vs gender; Q-Q, echo=FALSE, message=FALSE, warning=FALSE}
+ggqqplot(alt_m, title = "male")
+ggqqplot(alt_f, title = "female")
+```
