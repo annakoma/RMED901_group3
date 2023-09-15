@@ -32,7 +32,7 @@ p_val = summary(model)$coefficients[2,4]
 df_adjusted %>%
   ggplot(aes(chlor, as.integer(remission))) + 
   geom_smooth(method="glm", method.args=list(family="binomial")) +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   annotate("text", x = Inf, y = Inf, 
            label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
@@ -45,7 +45,7 @@ plt_rem_cl
 df_adjusted %>%
   ggplot(aes(tbil, cal)) +
   geom_smooth(method = "lm") +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
   labs(x = "total bilirubin", y = "calcium", 
        title = "Calcium and belirubin negatively correlate") ->

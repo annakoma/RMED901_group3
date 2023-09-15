@@ -37,10 +37,10 @@ plt_sod_gender
 df_adjusted %>%
   ggplot(aes(pot, wbc)) +
   geom_smooth(method = "lm") +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
   labs(x = "potassium", y = "white blood cell count", 
-       title = "White blood cell does not depend on pottassium") ->
+       title = "White blood cell does not depend on potassium") ->
   plt_wbc_pot
 plt_wbc_pot
 
@@ -48,7 +48,7 @@ plt_wbc_pot
 df_adjusted %>%
   ggplot(aes(prot, alb)) +
   geom_smooth(method = "lm") +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
   labs(x = "protein", y = "albumin", 
        title = "Albumin and protein have a linear relationship") ->
@@ -63,9 +63,9 @@ p_val = summary(model)$coefficients[2,4]
 df_adjusted %>%
   ggplot(aes(mono_percent, as.integer(remission))) + 
   geom_smooth(method="glm", method.args=list(family="binomial")) +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   annotate("text", x = Inf, y = Inf, 
-           label = sprintf("p = %.3f", p_val), vjust = 1, hjust = 1) +
+           label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   labs(x = "monocyte percent in WBC", y = "", 
        title = "Remission does not depend on monocyte") +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) ->
