@@ -1,0 +1,12 @@
+---
+title: "RMED901 Group 3 final report"
+author: "Anna-Kristina Fredheim Oma, Eric Holt, Maren Austevik Bø"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
