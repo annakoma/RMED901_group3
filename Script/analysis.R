@@ -32,7 +32,7 @@ p_val = summary(model)$coefficients[2,4]
 df_adjusted %>%
   ggplot(aes(chlor, as.integer(remission))) + 
   geom_smooth(method="glm", method.args=list(family="binomial")) +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   annotate("text", x = Inf, y = Inf, 
            label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
@@ -45,7 +45,7 @@ plt_rem_cl
 df_adjusted %>%
   ggplot(aes(tbil, cal)) +
   geom_smooth(method = "lm") +
-  geom_point(alpha = .5) +
+  geom_point(alpha = .1) +
   stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
   labs(x = "total bilirubin", y = "calcium", 
        title = "Calcium and belirubin negatively correlate") ->
@@ -53,10 +53,19 @@ df_adjusted %>%
 plt_ca_bil
 
 # According to the data, was there a difference of alanine transaminase between gender categories?
+# Normality check for t-test assumptions
+alt_m = df_adjusted[df_adjusted$gender == "M", ]$alt
+alt_f = df_adjusted[df_adjusted$gender == "F", ]$alt
+shapiro.test(alt_m)
+shapiro.test(alt_f)
+ggqqplot(alt_m)
+ggqqplot(alt_f)
+# ---Not normal. Should use non-parametric test.
+
 df_adjusted %>%
   ggplot(aes(gender, alt, fill = gender)) +
   geom_violin() +
-  geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
   labs(y = "alanine transaminase", 
        title = "Alanine transaminase does not depend on gender") +
   theme(legend.position = "none") ->
