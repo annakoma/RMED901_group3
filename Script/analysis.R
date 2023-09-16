@@ -53,10 +53,19 @@ df_adjusted %>%
 plt_ca_bil
 
 # According to the data, was there a difference of alanine transaminase between gender categories?
+# Normality check for t-test assumptions
+alt_m = df_adjusted[df_adjusted$gender == "M", ]$alt
+alt_f = df_adjusted[df_adjusted$gender == "F", ]$alt
+shapiro.test(alt_m)
+shapiro.test(alt_f)
+ggqqplot(alt_m)
+ggqqplot(alt_f)
+# ---Not normal. Should use non-parametric test.
+
 df_adjusted %>%
   ggplot(aes(gender, alt, fill = gender)) +
   geom_violin() +
-  geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
   labs(y = "alanine transaminase", 
        title = "Alanine transaminase does not depend on gender") +
   theme(legend.position = "none") ->

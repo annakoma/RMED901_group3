@@ -23,11 +23,20 @@ plt_cor_heat
 # (answer: yes)
   
 # Does the sodium distribution depend on `gender`?
+# Normality check for t-test assumptions
+sod_m = df_adjusted[df_adjusted$gender == "M", ]$sod
+sod_f = df_adjusted[df_adjusted$gender == "F", ]$sod
+shapiro.test(sod_m)
+shapiro.test(sod_f) 
+ggqqplot(sod_m)
+ggqqplot(sod_f)
+# ---Not normal. Should use non-parametric test.
+
 df_adjusted %>%
   ggplot(aes(gender, sod, fill = gender)) +
   geom_violin(alpha = .5) +
   geom_boxplot(alpha = .75) +
-  geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
   labs(y = "sodium", title = "Sodium does not depend on gender") +
   theme(legend.position = "none") ->
   plt_sod_gender

@@ -43,16 +43,27 @@ df %>%
   ggplot(aes(gender, sod, fill = gender)) +
   geom_violin(alpha = .5) +
   geom_boxplot(alpha = .75) +
+<<<<<<< Updated upstream
   geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
+=======
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
+>>>>>>> Stashed changes
   labs(y = "sodium") +
   theme(legend.position = "none")
 ```
 
 ```{r Na vs gender; p for reporting, include=FALSE}
+<<<<<<< Updated upstream
 p_val = signif(t.test(df[df$gender == "F",]$sod, df[df$gender == "M",]$sod)$p.value, 2)
 ```
 
 Sodium levels are distributed similarly between sexes. The difference is statistically insignificant (Welch two-sample $p=`r p_val`$).
+=======
+p_val = signif(wilcox.test(df[df$gender == "F",]$sod, df[df$gender == "M",]$sod)$p.value, 2)
+```
+
+Sodium levels are distributed similarly between sexes. The difference is statistically insignificant (Wilcoxon rank sum $p=`r p_val`$).
+>>>>>>> Stashed changes
 
 ### Does the white blood cell count distribution depend on `pot`?
 ```{r WBC vs K, echo=FALSE, message=FALSE, warning=FALSE}
@@ -125,7 +136,11 @@ df %>%
   theme(axis.text.y = element_blank())
 ```
 
+<<<<<<< Updated upstream
 A $\chi^2$ test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
+=======
+A $\chi^2$-test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
+>>>>>>> Stashed changes
 
 ### Does the remission depend on chloride?
 ```{r remission vs Cl, echo=FALSE, message=FALSE, warning=FALSE}
@@ -170,13 +185,42 @@ Linear regression shows a highly significant negative correlation (Pearson $R=`r
 df %>%
   ggplot(aes(gender, alt, fill = gender)) +
   geom_violin() +
+<<<<<<< Updated upstream
   geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
+=======
+  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
+>>>>>>> Stashed changes
   labs(y = "alanine transaminase") +
   theme(legend.position = "none")
 ```
 
 ```{r ALT vs gender; p for reporting, include=FALSE}
+<<<<<<< Updated upstream
 p_val = signif(t.test(df[df$gender == "F",]$alt, df[df$gender == "M",]$alt)$p.value, 2)
 ```
 
 Alanine transaminase levels are distributed similarly between sexes. The difference is statistically insignificant (Welch two-sample $p=`r p_val`$).
+=======
+p_val = signif(wilcox.test(df[df$gender == "F",]$alt, df[df$gender == "M",]$alt)$p.value, 2)
+```
+
+Alanine transaminase levels are distributed similarly between sexes. The difference is statistically insignificant (Wilcoxon rank sum $p=`r p_val`$).
+
+Non-parametric Wilcoxon test was used because the data distribution violated the t-test normality assumption.
+
+- Shapiro-Wilk test
+```{r ALT vs gender; Shapiro-Wilk, echo=FALSE}
+alt_m = df[df$gender == "M", ]$alt
+alt_f = df[df$gender == "F", ]$alt
+shapiro.test(alt_m)
+shapiro.test(alt_f)
+```
+
+- Q-Q plot
+
+```{r ALT vs gender; Q-Q, echo=FALSE, message=FALSE, warning=FALSE}
+ggqqplot(alt_m, title = "male")
+ggqqplot(alt_f, title = "female")
+```
+
+>>>>>>> Stashed changes
