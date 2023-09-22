@@ -1,12 +1,13 @@
 library(tidyverse)
 library(here)
 
-myData<- read_table(here("Data", "joined_adjusted.tsv"))
+# Adjusted data
+df_adjusted = read_delim(here("Data", "joined_adjusted.tsv"), delim = "\t")
 
-glimpse(myData)
+glimpse(df_adjusted)
 
 #extra plot
-ggplot(myData) +
+ggplot(df_adjusted) +
   aes(
     x = gender,
     y = remission
