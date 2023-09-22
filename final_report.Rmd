@@ -2,7 +2,11 @@
 title: "RMED901 Group 3 final report"
 author: "Anna-Kristina Fredheim Oma, Eric Holt, Maren Austevik Bø"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -83,8 +87,7 @@ df %>%
 
 ```{r}
 #extra plot of linear relationship
-plot_alb_prot<-
-  ggplot(df_adjusted) +
+  ggplot(df) +
   aes(
     x = prot,
     y = alb
@@ -159,7 +162,7 @@ remission_chloride <- df %>%
   group_by(remission, chlor)%>%
   na.omit()
 
-boxplot <- ggplot(data =remission_chloride) +
+ggplot(data =remission_chloride) +
   aes(x= remission, y = chlor
   ) +
   geom_boxplot()
@@ -205,17 +208,11 @@ Alanine transaminase levels are distributed similarly between sexes. The differe
 
 Non-parametric Wilcoxon test was used because the data distribution violated the t-test normality assumption.
 
-- Shapiro-Wilk test
-```{r ALT vs gender; Shapiro-Wilk, echo=FALSE}
-alt_m = df[df$gender == "M", ]$alt
-alt_f = df[df$gender == "F", ]$alt
-shapiro.test(alt_m)
-shapiro.test(alt_f)
-```
-
 - Q-Q plot
 
 ```{r ALT vs gender; Q-Q, echo=FALSE, message=FALSE, warning=FALSE}
+alt_m = df[df$gender == "M", ]$alt
+alt_f = df[df$gender == "F", ]$alt
 ggqqplot(alt_m, title = "male")
 ggqqplot(alt_f, title = "female")
 ```
