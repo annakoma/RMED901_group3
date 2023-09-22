@@ -19,9 +19,6 @@ plot_alb_prot<-
 #visualising
 plot_alb_prot #it looks like there is a linear relationship between albumin and protein
 
-#saving plot
-plot_alb_prot
-ggsave("plot_alb_prot.png", width=5, height=5)
 
 #making a plot exploring relationship between white blood cells and potassium
 plot_pot_wbc<-
@@ -45,9 +42,6 @@ plot_pot_wbc<-
   geom_point() +
   geom_smooth(method = "lm", colour="red")
 
-#saving plot
-plot_pot_wbc
-ggsave("plot_pot_wbc.png", width=5, height=5)
 
 #looking at plots next to each other
 plot_alb_prot + plot_pot_wbc
@@ -78,7 +72,5 @@ boxplot <- ggplot(data = sod_gender) +
   geom_boxplot()
 
 violinplot + boxplot
-
-ggsave(here("Plots", "plot_sod_gender.png"))
 
 
