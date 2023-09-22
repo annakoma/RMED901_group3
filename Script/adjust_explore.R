@@ -18,7 +18,6 @@ complete_data <-
   main_df %>%
   full_join(join_df, join_by("patient_id"))
 
-glimpse(complete_data)
 
 # converting the columns "active" and "remission" to factors.
 complete_data <- complete_data %>%
@@ -40,16 +39,14 @@ complete_data <- complete_data %>%
   select(patient_id, days_of_life, un, wbc, everything())
 
 # arrange patient_id column of your dataset in order of increasing number or alphabetically.
-complete_data <- complete_data %>%
+df_adjusted <- complete_data %>%
   arrange(sort(patient_id))
 
-glimpse(complete_data)
-fileName <- paste0("tidy_joined_data.txt")
-write_delim(complete_data,file = here("Data", fileName), delim = "\t" )
-
+# Write for examination (maybe in Excel)
+write_tsv(df_adjusted, here("Data", "joined_adjusted.tsv"))
 
 # glucose by gender
-complete_data %>%
+df_adjusted %>%
   group_by(gender) %>%
   summarize(
     min_gluc = min(gluc, na.rm = T),
@@ -59,7 +56,7 @@ complete_data %>%
   )
 
 # glucose by gender with hgb <= 10
-complete_data %>%
+df_adjusted %>%
   filter(hgb <= 10) %>%
   group_by(gender) %>%
   summarize(
@@ -70,7 +67,7 @@ complete_data %>%
   )
 
 # glucose by gender with remission
-complete_data %>%
+df_adjusted %>%
   filter(remission == T) %>%
   group_by(gender) %>%
   summarize(
@@ -81,7 +78,8 @@ complete_data %>%
   )
 
 # glucose by gender for older than around 40 years
-complete_data %>%
+
+df_adjusted %>%
   filter(days_of_life > 40 * 365.25) %>%
   group_by(gender) %>%
   summarize(
@@ -92,7 +90,7 @@ complete_data %>%
   )
 
 # glucose by gender with more than 10% of monocytes in WBC
-complete_data %>%
+df_adjusted %>%
   filter(mono_percent > 10) %>%
   group_by(gender) %>%
   summarize(
@@ -103,7 +101,5 @@ complete_data %>%
   )
 
 # table by gender and remission
-complete_data %>%
+df_adjusted %>%
   count(gender, remission)
-
-
