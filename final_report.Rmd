@@ -92,8 +92,7 @@ df %>%
     x = prot,
     y = alb
   ) +
-  geom_point() +
-  geom_smooth(method = "lm")
+  geom_point()
 ```
 
 ```{r albumin vs protein; R and p for reporting, include=FALSE}
