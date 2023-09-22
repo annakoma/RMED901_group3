@@ -137,6 +137,15 @@ df %>%
   annotate("text", x = 1.5, y = Inf, 
            label = sprintf("p = %.3f", p_val), vjust = 1, hjust = .5) +
   theme(axis.text.y = element_blank())
+
+
+#extra plot
+ggplot(df_adjusted) +
+  aes(
+    x = gender,
+    y = remission
+  ) +
+  geom_count(colour="red")
 ```
 
 A $\chi^2$-test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
