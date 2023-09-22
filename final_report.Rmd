@@ -2,16 +2,13 @@
 title: "RMED901 Group 3 final report"
 author: "Anna-Kristina Fredheim Oma, Eric Holt, Maren Austevik Bø"
 date: "`r Sys.Date()`"
-output:
-  html_document:
-    df_print: paged
-  word_document: default
-  pdf_document: default
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 
 ## Day 7 Visualization
 ```{r preamble, include=FALSE}
@@ -46,16 +43,16 @@ df %>%
   ggplot(aes(gender, sod, fill = gender)) +
   geom_violin(alpha = .5) +
   geom_boxplot(alpha = .75) +
-  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
+  geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
   labs(y = "sodium") +
   theme(legend.position = "none")
 ```
 
 ```{r Na vs gender; p for reporting, include=FALSE}
-p_val = signif(wilcox.test(df[df$gender == "F",]$sod, df[df$gender == "M",]$sod)$p.value, 2)
+p_val = signif(t.test(df[df$gender == "F",]$sod, df[df$gender == "M",]$sod)$p.value, 2)
 ```
 
-Sodium levels are distributed similarly between sexes. The difference is statistically insignificant (Wilcoxon rank sum $p=`r p_val`$).
+Sodium levels are distributed similarly between sexes. The difference is statistically insignificant (Welch two-sample $p=`r p_val`$).
 
 ### Does the white blood cell count distribution depend on `pot`?
 ```{r WBC vs K, echo=FALSE, message=FALSE, warning=FALSE}
@@ -112,7 +109,7 @@ df %>%
 
 According to logistic regression, the monocyte proportion does not seem to predict remission very well ($p=`r signif(p_val, 2)`$).
 
-## Day 8 Analysis
+## Day 8 Anasysis
 ### Does the remission depend on the gender?
 ```{r remission vs gender, echo=FALSE, message=FALSE, warning=FALSE}
 # Chi-squared test p-value
@@ -126,18 +123,9 @@ df %>%
   annotate("text", x = 1.5, y = Inf, 
            label = sprintf("p = %.3f", p_val), vjust = 1, hjust = .5) +
   theme(axis.text.y = element_blank())
-
-
-#extra plot
-ggplot(df_adjusted) +
-  aes(
-    x = gender,
-    y = remission
-  ) +
-  geom_count(colour="red")
 ```
 
-A $\chi^2$-test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
+A $\chi^2$ test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
 
 ### Does the remission depend on chloride?
 ```{r remission vs Cl, echo=FALSE, message=FALSE, warning=FALSE}
@@ -154,17 +142,6 @@ df %>%
            label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
   labs(x = "chloride", y = "")
-
-#extra plot remission vs. chloride
-remission_chloride <- df %>%
-  group_by(remission, chlor)%>%
-  na.omit()
-
-ggplot(data =remission_chloride) +
-  aes(x= remission, y = chlor
-  ) +
-  geom_boxplot()
-
 ```
 
 Logistic regression shows that higher chloride levels predict a higher probability of remission ($p=`r signif(p_val, 2)`$).
@@ -193,24 +170,13 @@ Linear regression shows a highly significant negative correlation (Pearson $R=`r
 df %>%
   ggplot(aes(gender, alt, fill = gender)) +
   geom_violin() +
-  geom_signif(comparisons = list(c("M", "F")), test = "wilcox.test") +
+  geom_signif(comparisons = list(c("M", "F")), test = "t.test") +
   labs(y = "alanine transaminase") +
   theme(legend.position = "none")
 ```
 
 ```{r ALT vs gender; p for reporting, include=FALSE}
-p_val = signif(wilcox.test(df[df$gender == "F",]$alt, df[df$gender == "M",]$alt)$p.value, 2)
+p_val = signif(t.test(df[df$gender == "F",]$alt, df[df$gender == "M",]$alt)$p.value, 2)
 ```
 
-Alanine transaminase levels are distributed similarly between sexes. The difference is statistically insignificant (Wilcoxon rank sum $p=`r p_val`$).
-
-Non-parametric Wilcoxon test was used because the data distribution violated the t-test normality assumption.
-
-- Q-Q plot
-
-```{r ALT vs gender; Q-Q, echo=FALSE, message=FALSE, warning=FALSE}
-alt_m = df[df$gender == "M", ]$alt
-alt_f = df[df$gender == "F", ]$alt
-ggqqplot(alt_m, title = "male")
-ggqqplot(alt_f, title = "female")
-```
+Alanine transaminase levels are distributed similarly between sexes. The difference is statistically insignificant (Welch two-sample $p=`r p_val`$).
