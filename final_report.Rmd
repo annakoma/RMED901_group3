@@ -8,6 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ## Day 7 Visualization
 ```{r preamble, include=FALSE}
 library(tidyverse)
@@ -78,6 +79,18 @@ df %>%
   geom_point(alpha = .1) +
   stat_cor(label.x = Inf, label.y = Inf, hjust = 1, vjust = 1) +
   labs(x = "protein", y = "albumin")
+```
+
+```{r}
+#extra plot of linear relationship
+plot_alb_prot<-
+  ggplot(df_adjusted) +
+  aes(
+    x = prot,
+    y = alb
+  ) +
+  geom_point() +
+  geom_smooth(method = "lm")
 ```
 
 ```{r albumin vs protein; R and p for reporting, include=FALSE}
