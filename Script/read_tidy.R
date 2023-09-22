@@ -18,3 +18,4 @@ fileName <- paste0("blood_sample_", Sys.Date(), ".txt")
 write_delim(myData, 
             file = here("Data", fileName), delim="\t")
 
+
