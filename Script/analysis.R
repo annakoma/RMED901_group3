@@ -1,11 +1,14 @@
 library(tidyverse)
 library(here)
+
 library(reshape2)
 library(ggpubr)
 library(patchwork)
 
 # Adjusted data
 df_adjusted = read_delim(here("Data", "joined_adjusted.tsv"), delim = "\t")
+
+glimpse(df_adjusted)
 
 # Does the remission depend on the gender?
 # Chi-squared test p-value
@@ -22,6 +25,14 @@ df_adjusted %>%
   labs(title = "Remission does not depend on gender") ->
   plt_rem_gender
 plt_rem_gender
+
+#extra plot
+ggplot(df_adjusted) +
+  aes(
+    x = gender,
+    y = remission
+  ) +
+  geom_count(colour="red")
 
 # Does the remission depend on chloride?
 # p-value from logistic regression model
@@ -90,4 +101,5 @@ plt_ala_gender
 
 # Save plot
 ggsave(here("Plots", "Day_8_Combined.png"), width = 12, height = 10)
+
 

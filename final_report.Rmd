@@ -8,8 +8,6 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-
 ## Day 7 Visualization
 ```{r preamble, include=FALSE}
 library(tidyverse)
@@ -109,7 +107,7 @@ df %>%
 
 According to logistic regression, the monocyte proportion does not seem to predict remission very well ($p=`r signif(p_val, 2)`$).
 
-## Day 8 Anasysis
+## Day 8 Analysis
 ### Does the remission depend on the gender?
 ```{r remission vs gender, echo=FALSE, message=FALSE, warning=FALSE}
 # Chi-squared test p-value
