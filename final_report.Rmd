@@ -120,7 +120,7 @@ df %>%
 
 According to logistic regression, the monocyte proportion does not seem to predict remission very well ($p=`r signif(p_val, 2)`$).
 
-## Day 8 Anasysis
+## Day 8 Analysis
 ### Does the remission depend on the gender?
 ```{r remission vs gender, echo=FALSE, message=FALSE, warning=FALSE}
 # Chi-squared test p-value
@@ -153,6 +153,15 @@ df %>%
            label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
   labs(x = "chloride", y = "")
+# extra plot
+remission_chloride <- df %>%
+  group_by(remission, chlor)%>%
+  na.omit()
+
+ggplot(data =remission_chloride) +
+  aes(x= remission, y = chlor
+  ) +
+  geom_boxplot()
 ```
 
 Logistic regression shows that higher chloride levels predict a higher probability of remission ($p=`r signif(p_val, 2)`$).

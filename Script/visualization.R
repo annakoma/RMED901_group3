@@ -64,7 +64,6 @@ df_adjusted %>%
   plt_alb_prot
 plt_alb_prot
 
-
 # Does remission of inflammation after Thiopurines for > 12 weeks change with percent of monocytes in WBC count?
 # p-value from logistic regression model
 model = glm(remission ~ mono_percent, data = df_adjusted, family = binomial)
@@ -90,7 +89,6 @@ plt_cor_heat /
 # Save plot
 ggsave(here("Plots", "Day_7_Combined.png"), width = 12, height = 15)
 
-
 #extra plots
 #first grouping by gender and sod
 
@@ -113,5 +111,4 @@ plot_alb_prot<-
   ) +
   geom_point() +
   geom_smooth(method = "lm")
-
 
