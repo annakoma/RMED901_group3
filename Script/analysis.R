@@ -46,7 +46,7 @@ plt_rem_cl
 remission_chloride <- df_adjusted %>%
   group_by(remission, chlor)%>%
   na.omit()
-?aes
+
 boxplot <- ggplot(data =remission_chloride) +
   aes(x= remission, y = chlor
   ) +
