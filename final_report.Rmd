@@ -142,7 +142,7 @@ df %>%
   labs(x = "chloride", y = "")
 
 #extra plot remission vs. chloride
-remission_chloride <- df_adjusted %>%
+remission_chloride <- df %>%
   group_by(remission, chlor)%>%
   na.omit()
 
