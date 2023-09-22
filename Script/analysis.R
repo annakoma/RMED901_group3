@@ -5,7 +5,7 @@ library(ggpubr)
 library(patchwork)
 
 # Adjusted data
-df_adjusted = read_table(here("Data", "joined_adjusted.tsv"))
+df_adjusted = read_delim(here("Data", "joined_adjusted.tsv"), delim = "\t")
 
 # Does the remission depend on the gender?
 # Chi-squared test p-value
@@ -40,6 +40,18 @@ df_adjusted %>%
        title = "Remission depends on chloride") ->
   plt_rem_cl
 plt_rem_cl
+
+
+#extra plot remission vs. chloride
+remission_chloride <- df_adjusted %>%
+  group_by(remission, chlor)%>%
+  na.omit()
+?aes
+boxplot <- ggplot(data =remission_chloride) +
+  aes(x= remission, y = chlor
+  ) +
+  geom_boxplot()
+
 
 # Is there an association between calcium and total bilirubin?
 df_adjusted %>%
