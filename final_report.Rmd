@@ -85,16 +85,6 @@ df %>%
   labs(x = "protein", y = "albumin")
 ```
 
-```{r}
-#extra plot of linear relationship
-  ggplot(df) +
-  aes(
-    x = prot,
-    y = alb
-  ) +
-  geom_point()
-```
-
 ```{r albumin vs protein; R and p for reporting, include=FALSE}
 ct = cor.test(df$prot, df$alb)
 pearson_r = signif(ct$estimate, 2)
@@ -136,6 +126,15 @@ df %>%
   annotate("text", x = 1.5, y = Inf, 
            label = sprintf("p = %.3f", p_val), vjust = 1, hjust = .5) +
   theme(axis.text.y = element_blank())
+
+
+#extra plot
+ggplot(df_adjusted) +
+  aes(
+    x = gender,
+    y = remission
+  ) +
+  geom_count(colour="red")
 ```
 
 A $\chi^2$-test indicates no significant difference in remission rate between sexes ($p\approx`r signif(p_val, 2)`$).
