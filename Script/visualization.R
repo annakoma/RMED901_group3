@@ -89,3 +89,26 @@ plt_cor_heat /
 # Save plot
 ggsave(here("Plots", "Day_7_Combined.png"), width = 12, height = 15)
 
+#extra plots
+#first grouping by gender and sod
+
+sod_gender <- df_adjusted %>%
+  group_by(gender, sod) 
+#plotting gender vs. sod as a violinplot 
+violinplot <- ggplot(data = sod_gender) +
+  aes(
+    x = gender,
+    y = sod
+  ) +
+  geom_violin()
+
+#making a plot showing linear relationship between protein and albumin
+plot_alb_prot<-
+  ggplot(df_adjusted) +
+  aes(
+    x = prot,
+    y = alb
+  ) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
