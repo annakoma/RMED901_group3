@@ -3,6 +3,7 @@ title: "RMED901 Group 3 final report"
 author: "Anna-Kristina Fredheim Oma, Eric Holt, Maren Austevik Bø"
 date: "`r Sys.Date()`"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
