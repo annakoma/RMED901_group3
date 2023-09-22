@@ -140,15 +140,17 @@ df %>%
            label = sprintf("p = %.3e", p_val), vjust = 1, hjust = 1) +
   scale_y_continuous(breaks = c(0, 1), labels = c("no remission", "remission")) +
   labs(x = "chloride", y = "")
-# extra plot
-remission_chloride <- df %>%
+
+#extra plot remission vs. chloride
+remission_chloride <- df_adjusted %>%
   group_by(remission, chlor)%>%
   na.omit()
 
-ggplot(data =remission_chloride) +
+boxplot <- ggplot(data =remission_chloride) +
   aes(x= remission, y = chlor
   ) +
   geom_boxplot()
+
 ```
 
 Logistic regression shows that higher chloride levels predict a higher probability of remission ($p=`r signif(p_val, 2)`$).
